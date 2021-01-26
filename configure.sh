@@ -63,4 +63,11 @@ cd /home/vagrant/torque-sites/base/simplesaml/ansible
 envsubst < inv/local/group_vars/all.tmpl > inv/local/group_vars/all
 ansible-playbook simplesaml.yml -i inv/local
 
+# Install the DemoView competition
+echo "INSTALL DemoView competition"
+export MEDIAWIKI_INSTALL_DIRECTORY=/var/www/html/competitions/demoview
+cd /home/vagrant/torque-sites/competitions/DemoView/ansible
+envsubst < inv/local/group_vars/all.tmpl > inv/local/group_vars/all
+ansible-playbook DemoView.yml -i inv/local
+
 echo "ALL DONE"
