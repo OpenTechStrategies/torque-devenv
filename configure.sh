@@ -114,4 +114,20 @@ cd /home/vagrant/torque-sites/competitions/DemoView/ansible
 envsubst < inv/local/group_vars/all.tmpl > inv/local/group_vars/all
 ansible-playbook DemoView.yml -i inv/local
 
+# Install the 100Change2020 competition
+echo "INSTALL 100Change2020 competition"
+export MEDIAWIKI_INSTALL_DIRECTORY=/var/www/html/competitions/100Change2020
+cd /home/vagrant/torque-sites/competitions/100Change2020/ansible
+envsubst < inv/local/group_vars/all.tmpl > inv/local/group_vars/all
+ansible-playbook 100Change2020.yml -i inv/local
+if [ ETL_ENABLED ]
+then
+	export WIKI_URL='http://127.0.0.1/100Change2020'
+	cd $OTS_DIR/clients/lever-for-change/torque-sites/100Change2020/data
+	$OTS_DIR/utils/get-bigdata -c
+	cd /home/vagrant/torque-sites/competitions/100Change2020/etl
+	envsubst < config.py.tmpl > config.py
+	./deploy -g "$DECRYPTION_PASSPHRASE" /home/vagrant/data/decrypted
+fi
+
 echo "ALL DONE"
