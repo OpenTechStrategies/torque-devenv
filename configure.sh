@@ -15,7 +15,7 @@ apt-get -qq update
 apt-get -qq install -y ansible
 
 echo "Install ETL software packages"
-apt-get -qq install -y subversion gpg unzip python3-pip acl
+apt-get -qq install -y subversion git gpg unzip python3-pip acl
 
 echo "Install web server tools"
 apt-get -qq install -y apache2
@@ -97,8 +97,8 @@ else
 	svn checkout \
 		https://svn.opentechstrategies.com/repos/ots/trunk/clients/lever-for-change/torque-sites \
 		$OTS_DIR/clients/lever-for-change/torque-sites
-	svn checkout \
-		https://svn.opentechstrategies.com/repos/ots/trunk/utils \
+	git clone \
+		https://github.com/OpenTechStrategies/ots-tools.git \
 		$OTS_DIR/utils
 
 	mkdir /home/vagrant/data/decrypted
