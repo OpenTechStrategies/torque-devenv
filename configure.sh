@@ -14,6 +14,9 @@ echo "Install essential software pacakges"
 apt-get -qq update
 apt-get -qq install -y ansible
 
+echo "Install ETL software packages"
+apt-get -qq install -y subversion gpg unzip python3-pip acl
+
 echo "Install web server tools"
 apt-get -qq install -y apache2
 chown -R www-data /var/www/
@@ -21,12 +24,19 @@ chown -R www-data /var/www/
 echo "Set up base ansible"
 export ANSIBLE_ROLES_PATH=$ANSIBLE_ROLES_PATH:/home/vagrant/torque-sites/roles
 
+# Configure subversion
+mkdir /root/.subversion
+cp -R $TEMPLATES_PATH/root/.subversion/* /root/.subversion
+
 # Define env variables for ansible templates
 export DB_USERNAME=torque
 export DB_PASSWORD=torque
 export DEPLOYMENT_USER=$APP_USER
+export MEDIAWIKI_ADMIN_USERNAME=admin
 export MEDIAWIKI_ADMIN_PASSWORD=admin_password
+export MEDIAWIKI_MWLIB_USERNAME=mwlib
 export MEDIAWIKI_MWLIB_PASSWORD=mwlib_password
+export MEDIAWIKI_CSV2WIKI_USERNAME=csv2wiki
 export MEDIAWIKI_CSV2WIKI_PASSWORD=csv2wiki_password
 export MWLIB_INSTALL_DIRECTORY=/home/vagrant/mwlib/
 export MYSQL_ROOT_PASSWORD=root
@@ -38,8 +48,11 @@ export SIMPLESAML_SALT="$(LC_CTYPE=C tr -c -d '0123456789abcdefghijklmnopqrstuvw
 export TORQUEDATA_INSTALL_DIRECTORY=/home/vagrant/torquedata
 export TORQUEDATA_SERVER_PORT=5000
 
+# There are two names used for for the same thing in various ansible scripts
+# Rather than shave that yak at this stage, and rather than duplicate values,
+# we're just reassigning here based on the arbitrarily selected canonical name.
 export TORQUEDATA_PORT=$TORQUEDATA_SERVER_PORT
-export HTML_DIRECTORY=$ROOT_WEB_DIRECTORY # Two names for the same thing so we reassign it here
+export HTML_DIRECTORY=$ROOT_WEB_DIRECTORY
 
 # Set up folder access
 mkdir /var/www/html/competitions
@@ -63,9 +76,40 @@ cd /home/vagrant/torque-sites/base/simplesaml/ansible
 envsubst < inv/local/group_vars/all.tmpl > inv/local/group_vars/all
 ansible-playbook simplesaml.yml -i inv/local
 
+# Set up ETL
+if [ -z "$OTS_SVN_USERNAME" ]
+then
+	echo "Skipping ETL Setup (OTS_SVN_USERNAME not set)"
+	ETL_ENABLED=false
+else
+	echo "Set up ETL"
+	export OTS_DIR=/home/vagrant/data/ots
+	mkdir -p $OTS_DIR/clients/lever-for-change/torque-sites
+	mkdir -p $OTS_DIR/utils
+
+	# Save SVN Credentials
+	svn list \
+		--username $OTS_SVN_USERNAME \
+		--password $OTS_SVN_PASSWORD \
+		https://svn.opentechstrategies.com/repos/ots/trunk/clients/lever-for-change > /dev/null
+
+	# Check out ETL repositories
+	svn checkout \
+		https://svn.opentechstrategies.com/repos/ots/trunk/clients/lever-for-change/torque-sites \
+		$OTS_DIR/clients/lever-for-change/torque-sites
+	svn checkout \
+		https://svn.opentechstrategies.com/repos/ots/trunk/utils \
+		$OTS_DIR/utils
+
+	mkdir /home/vagrant/data/decrypted
+	cd /home/vagrant/torque-sites/etl
+	pip3 install -e .
+	ETL_ENABLED=true
+fi
+
 # Install the DemoView competition
 echo "INSTALL DemoView competition"
-export MEDIAWIKI_INSTALL_DIRECTORY=/var/www/html/competitions/demoview
+export MEDIAWIKI_INSTALL_DIRECTORY=/var/www/html/competitions/DemoView
 cd /home/vagrant/torque-sites/competitions/DemoView/ansible
 envsubst < inv/local/group_vars/all.tmpl > inv/local/group_vars/all
 ansible-playbook DemoView.yml -i inv/local
