@@ -1,0 +1,19 @@
+### This subversion servers fuke exists to enable the ETL of the torque-sites project.
+### It exists in two forms:
+### 1) as a template file in the torque-devenv repository
+### 2) as a real config file in the vagrant guest machine at /root/.subversion/config
+###
+### If you are viewing it within the guest machine, know that any edits may be deleted
+### on a re-provision, and should ALSO be made in the template file.
+###
+### Because this file is so special, we have pared down all of the examples / comments
+### in the standard default svn config.  This hones in on the key settings used in our
+### project.  You can view the git history to see the original file contents.
+
+[groups]
+[global]
+### Since most subversion commands being run in the guest machine are scripted, we would
+### like to be able to specify the password once; by storing in plaintext it also becomes
+### easier to script against in future.
+store-passwords = yes
+store-plaintext-passwords = yes
