@@ -36,7 +36,12 @@ The `.env.template` file explains the circumstances in which a developer may wan
 
 5. Run `vagrant up`
 
-This will build the machine and run the configuration. The machine will not have any competitions set up yet; this will need to be done manually depending on which competition you want to work with.
+This will build the machine and run the configuration. The final output will expose what the IP address of your guest machine is. This is dynamic and frequently changes between restarts.
+
+The following competitions are enabled after provisioning:
+
+* DemoView (accessed at `http://{GUEST_IP}/DemoView`)
+* 100Change2020 (accessed at `http://{GUEST_IP}/100Change2020`)
 
 ## Tips
 
