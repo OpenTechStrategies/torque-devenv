@@ -24,6 +24,9 @@ chown -R www-data /var/www/
 echo "Set up base ansible"
 export ANSIBLE_ROLES_PATH=$ANSIBLE_ROLES_PATH:/home/vagrant/torque-sites/roles
 
+# Configure apache
+cp $TEMPLATES_PATH/etc/apache2/apache2.conf /etc/apache2/apache2.conf
+
 # Configure subversion
 mkdir /root/.subversion
 cp -R $TEMPLATES_PATH/root/.subversion/* /root/.subversion
