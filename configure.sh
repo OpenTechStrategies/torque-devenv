@@ -14,6 +14,11 @@ echo "Install essential software pacakges"
 apt-get -qq update
 apt-get -qq install -y ansible
 
+echo "Install Node"
+curl -sL https://deb.nodesource.com/setup_14.x | sudo bash -
+sudo apt -y install nodejs
+sudo npm install --global yarn
+
 echo "Install ETL software packages"
 apt-get -qq install -y subversion git gpg unzip python3-pip acl
 apt-get -qq install -y xlsx2csv
@@ -21,6 +26,35 @@ apt-get -qq install -y xlsx2csv
 echo "Install web server tools"
 apt-get -qq install -y apache2
 chown -R www-data /var/www/
+
+echo "Install SimpleBook depdendencies"
+apt-get -qq install -y ca-certificates fonts-liberation libappindicator3-1 libasound2
+apt-get -qq install -y libatk-bridge2.0-0 libatk1.0-0 libc6libcairo2 libcups2 libdbus-1-3
+apt-get -qq install -y libexpat1 libfontconfig1 libgbm1 libgcc1 libglib2.0-0 libgtk-3-0 libnspr4
+apt-get -qq install -y libnss3 libpango-1.0-0 libpangocairo-1.0-0 libstdc++6 libx11-6 libx11-xcb1
+apt-get -qq install -y libxcb1 libxcomposite1 libxcursor1 libxdamage1 libxext6 libxfixes3 libxi6
+apt-get -qq install -y libxrandr2 libxrender1 libxss1 libxtst6 lsb-release wget xdg-utils
+npm install -g yarn
+cd /home/vagrant/SimpleBook/api/mw2pdf
+yarn install
+cd /home/vagrant/SimpleBook/api
+pipenv install
+
+echo "Set up Redis"
+cd /home/vagrant
+wget http://download.redis.io/redis-stable.tar.gz
+tar xvzf redis-stable.tar.gz
+rm redis-stable.tar.gz
+cd redis-stable && make
+sudo cp src/redis-server /usr/local/bin/
+sudo cp src/redis-cli /usr/local/bin/
+sudo mkdir /etc/redis
+sudo mkdir -p /var/redis/6379
+sudo cp $TEMPLATES_PATH/etc/init.d/redis_6379 /etc/init.d/redis_6379
+sudo cp $TEMPLATES_PATH/etc/redis/6379.conf /etc/redis/6379.conf
+sudo chmod 722 /etc/init.d/redis_6379
+sudo update-rc.d redis_6379 defaults
+sudo /etc/init.d/redis_6379 start
 
 echo "Set up base ansible"
 export ANSIBLE_ROLES_PATH=$ANSIBLE_ROLES_PATH:/home/vagrant/torque-sites/roles
@@ -111,6 +145,12 @@ else
 	ETL_ENABLED=true
 fi
 
+# Set up SimpleBook server
+cp $TEMPLATES_PATH/etc/systemd/system/simplebook.service /etc/systemd/system/simplebook.service
+sudo chmod 755 /etc/systemd/system/simplebook.service
+sudo systemctl daemon-reload
+sudo systemctl start simplebook.service
+
 # Install the DemoView competition
 echo "INSTALL DemoView competition"
 export MEDIAWIKI_INSTALL_DIRECTORY=/var/www/html/competitions/DemoView
@@ -132,6 +172,8 @@ then
 	cd /home/vagrant/torque-sites/competitions/100Change2020/etl
 	envsubst < config.py.tmpl > config.py
 	./deploy -g "$DECRYPTION_PASSPHRASE" /home/vagrant/data/decrypted
+	rm -fr /var/www/html/100Change2020/extensions/Collection
+	ln -s /var/www/html/100Change2020/extensions/Collection /home/vagrant/SimpleBook
 fi
 
 # Install the LLIIA2020 competition
@@ -148,6 +190,8 @@ then
 	cd /home/vagrant/torque-sites/competitions/LLIIA2020/etl
 	envsubst < config.py.tmpl > config.py
 	./deploy -g "$DECRYPTION_PASSPHRASE" /home/vagrant/data/decrypted
+	rm -fr /var/www/html/LLIIA2020/extensions/Collection
+	ln -s /var/www/html/LLIIA2020/extensions/Collection /home/vagrant/SimpleBook
 fi
 
 # Install the Climte2030 competition
