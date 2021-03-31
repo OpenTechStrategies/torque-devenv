@@ -16,6 +16,7 @@ apt-get -qq install -y ansible
 
 echo "Install ETL software packages"
 apt-get -qq install -y subversion git gpg unzip python3-pip acl
+apt-get -qq install -y xlsx2csv
 
 echo "Install web server tools"
 apt-get -qq install -y apache2
@@ -145,6 +146,38 @@ then
 	cd $OTS_DIR/clients/lever-for-change/torque-sites/LLIIA2020/data
 	$OTS_DIR/utils/get-bigdata -c
 	cd /home/vagrant/torque-sites/competitions/LLIIA2020/etl
+	envsubst < config.py.tmpl > config.py
+	./deploy -g "$DECRYPTION_PASSPHRASE" /home/vagrant/data/decrypted
+fi
+
+# Install the Climte2030 competition
+echo "INSTALL Climate2030 competition"
+export MEDIAWIKI_INSTALL_DIRECTORY=/var/www/html/competitions/Climate2030
+cd /home/vagrant/torque-sites/competitions/Climate2030/ansible
+envsubst < inv/local/group_vars/all.tmpl > inv/local/group_vars/all
+ansible-playbook Climate2030.yml -i inv/local
+if [ ETL_ENABLED ]
+then
+	export WIKI_URL='http://127.0.0.1/Climate2030'
+	cd $OTS_DIR/clients/lever-for-change/torque-sites/Climate2030/data
+	$OTS_DIR/utils/get-bigdata -c
+	cd /home/vagrant/torque-sites/competitions/Climate2030/etl
+	envsubst < config.py.tmpl > config.py
+	./deploy -g "$DECRYPTION_PASSPHRASE" /home/vagrant/data/decrypted
+fi
+
+# Install the LoneStar2020 competition
+echo "INSTALL LoneStar2020 competition"
+export MEDIAWIKI_INSTALL_DIRECTORY=/var/www/html/competitions/LoneStar2020
+cd /home/vagrant/torque-sites/competitions/LoneStar2020/ansible
+envsubst < inv/local/group_vars/all.tmpl > inv/local/group_vars/all
+ansible-playbook LoneStar2020.yml -i inv/local
+if [ ETL_ENABLED ]
+then
+	export WIKI_URL='http://127.0.0.1/LoneStar2020'
+	cd $OTS_DIR/clients/lever-for-change/torque-sites/LoneStar2020/data
+	$OTS_DIR/utils/get-bigdata -c
+	cd /home/vagrant/torque-sites/competitions/LoneStar2020/etl
 	envsubst < config.py.tmpl > config.py
 	./deploy -g "$DECRYPTION_PASSPHRASE" /home/vagrant/data/decrypted
 fi
