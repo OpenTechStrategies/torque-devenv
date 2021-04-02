@@ -15,6 +15,7 @@ Follow these steps to get a development environment.
 
 * `torque-sites`: a clone of the [torque-sites repository](https://github.com/OpenTechStrategies/torque-sites).
 * `data`: an empty folder where competition data will be stored.
+* `SimpleBook`: a clone of the [SimpleBook repository](https://github.com/OpenTechStrategies/SimpleBook).
 
 Your directory structure should look something like this:
 ```
@@ -22,6 +23,7 @@ Your directory structure should look something like this:
 | - devenv
 | - torque-sites
 | - data
+| - SimpleBook
 ```
 
 4. (Optional) Populate necessary environment variables
@@ -42,6 +44,17 @@ The following competitions are enabled after provisioning:
 
 * DemoView (accessed at `http://{GUEST_IP}/DemoView`)
 * 100Change2020 (accessed at `http://{GUEST_IP}/100Change2020`)
+
+## Viewing Logs
+
+### SimpleBook
+
+SimpleBook is run as a systemd service and logs can be found at:
+
+```
+/var/log/simplebook.output.log // output of the flask app is rendered here
+/var/log/simplebook.error.log
+```
 
 ## Tips
 
