@@ -11,6 +11,10 @@ Follow these steps to get a development environment.
 
 2. Install [VirtualBox Guest Additions](https://www.virtualbox.org/manual/ch04.html) to support mounting shared folders.
 
+```
+vagrant plugin install vagrant-vbguest
+```
+
 3. Create *sibling* directories to `devenv`:
 
 * `torque-sites`: a clone of the [torque-sites repository](https://github.com/OpenTechStrategies/torque-sites).
@@ -36,6 +40,8 @@ $ source .env
 
 The `.env.template` file explains the circumstances in which a developer may want to populate these variables.
 
+In order for this devenv setup to work properly, you must create a `.env` file from the template _and_ configure the `SVN_*` variables.
+
 5. Run `vagrant up`
 
 This will build the machine and run the configuration. The final output will expose what the IP address of your guest machine is. This is dynamic and frequently changes between restarts.
@@ -60,5 +66,11 @@ SimpleBook is run as a systemd service and logs can be found at:
 
 * To stop the virtual machine run `vagrant halt`
 * To SSH into the virtual machine run `vagrant ssh`
-* If you want to re-run the contents of the VagrantFile you can run `vagrant up --provision` to reprovision.
+* If you want to re-run the contents of the VagrantFile you can run
+
+  ```
+  vagrant up --provision
+  ```
+
+  to reprovision.
 * If you really want to completely start fresh run `vagrant destroy`.
