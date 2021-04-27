@@ -52,7 +52,9 @@ The following competitions are enabled after provisioning:
 SimpleBook is run as a systemd service and logs can be found at:
 
 ```
-/var/log/simplebook.output.log // output of the flask app is rendered here
+/var/log/simplebook.output.log // output of the flask app
+/var/log/simplebook.error.log
+/var/log/simplebookworker.1.output.log // output of the queue worker
 /var/log/simplebook.error.log
 ```
 
