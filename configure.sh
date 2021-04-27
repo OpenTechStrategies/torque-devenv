@@ -18,31 +18,31 @@ echo "done."
 
 # Now, check to make sure that all relevant variables are configured
 # with sane values.
-if [ "x${OTS_SVN_USERNAME}" == "x" ];
+if [ -z "${OTS_SVN_USERNAME}" ];
 then
 	echo -n "Warning: Missing configuration of OTS_SVN_USERNAME; "
 	echo "some functionality may not work."
 fi
 
-if [ "x${OTS_SVN_PASSWORD}" == "x" ];
+if [ -z "${OTS_SVN_PASSWORD}" ];
 then
 	echo -n "Warning: Missing configuration of OTS_SVN_PASSWORD; "
 	echo "some functionality may not work."
 fi
 
-if [ "x${DECRYPTION_PASSPHRASE}" == "x" ];
+if [ -z "${DECRYPTION_PASSPHRASE}" ];
 then
 	echo -n "Warning: Missing configuration of DECRYPTION_PASSPHRASE; "
 	echo "some functionality may not work."
 fi
 
-if [ "x${SIMPLESAML_OKTA_METADATA_NAME}" == "x" ];
+if [ -z "${SIMPLESAML_OKTA_METADATA_NAME}" ];
 then
 	echo -n "Warning: Missing configuration of SIMPLESAML_OKTA_METADATA_NAME; "
 	echo "some functionality may not work."
 fi
 
-if [ "x${SIMPLESAML_OKTA_METADATA_URL}" == "x" ];
+if [ -z "${SIMPLESAML_OKTA_METADATA_URL}" ];
 then
 	echo -n "Warning: Missing configuration of SIMPLESAML_OKTA_METADATA_URL; "
 	echo "some functionality may not work."

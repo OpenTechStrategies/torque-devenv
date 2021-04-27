@@ -34,7 +34,7 @@ Your directory structure should look something like this:
 
 ```
 $ cp configuration/configuration.env.template configuration/configuration.env
-$ vi configuration/configuration.env
+$ $EDITOR configuration/configuration.env
 ```
 
 The `configuration/configuration.env.template` file explains the circumstances in which a developer may want to populate these variables.
@@ -52,6 +52,10 @@ The following competitions are enabled after provisioning:
 
 ## Viewing Logs
 
+Apache logs are available _in the VM_ at `/var/log/apache2/`.
+
+MediaWiki logs can be enabled selectively by following the instructions [here](https://www.mediawiki.org/wiki/Manual:How_to_debug).
+
 ### SimpleBook
 
 SimpleBook is run as a systemd service and logs can be found at:
@@ -61,6 +65,12 @@ SimpleBook is run as a systemd service and logs can be found at:
 /var/log/simplebook.error.log
 ```
 
+## Using the Development Environment
+
+### 100Change2020
+1. Log in with a local user by opening `http://{GUEST_IP}/100Change2020/locallogin.php`. You can use `admin` and `admin_password` as the username and password, respectively.
+2. Browse through some of the applications by clicking on the `Random Page` link on the wiki sidebar.
+ 
 ## Tips
 
 * To stop the virtual machine run `vagrant halt`
