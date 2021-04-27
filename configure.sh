@@ -5,6 +5,49 @@ export DEBIAN_FRONTEND=noninteractive
 echo "US/Central" | sudo tee /etc/timezone
 dpkg-reconfigure --frontend noninteractive tzdata
 
+# Let's read some configuration information
+# from the user.
+echo -n "Reading configuration..."
+source /home/vagrant/configuration/configuration.env > /dev/null 2>&1
+if [ $? -ne 0 ];
+then
+	echo "failure. Could not source your configuration/configuration.env file."
+	exit 1
+fi
+echo "done."
+
+# Now, check to make sure that all relevant variables are configured
+# with sane values.
+if [ "x${OTS_SVN_USERNAME}" == "x" ];
+then
+	echo -n "Warning: Missing configuration of OTS_SVN_USERNAME; "
+	echo "some functionality may not work."
+fi
+
+if [ "x${OTS_SVN_PASSWORD}" == "x" ];
+then
+	echo -n "Warning: Missing configuration of OTS_SVN_PASSWORD; "
+	echo "some functionality may not work."
+fi
+
+if [ "x${DECRYPTION_PASSPHRASE}" == "x" ];
+then
+	echo -n "Warning: Missing configuration of DECRYPTION_PASSPHRASE; "
+	echo "some functionality may not work."
+fi
+
+if [ "x${SIMPLESAML_OKTA_METADATA_NAME}" == "x" ];
+then
+	echo -n "Warning: Missing configuration of SIMPLESAML_OKTA_METADATA_NAME; "
+	echo "some functionality may not work."
+fi
+
+if [ "x${SIMPLESAML_OKTA_METADATA_URL}" == "x" ];
+then
+	echo -n "Warning: Missing configuration of SIMPLESAML_OKTA_METADATA_URL; "
+	echo "some functionality may not work."
+fi
+
 echo "Add custom sources"
 # Add ansible key
 sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 6125E2A8C77F2818FB7BD15B93C4A3FD7BB9C367

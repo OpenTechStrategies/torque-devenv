@@ -30,17 +30,16 @@ Your directory structure should look something like this:
 | - SimpleBook
 ```
 
-4. (Optional) Populate necessary environment variables
+4. (Optional, but highly recommended) Populate necessary environment variables
 
 ```
-$ cp .env.template .env
-$ vi .env
-$ source .env
+$ cp configuration/configuration.env.template configuration/configuration.env
+$ vi configuration/configuration.env
 ```
 
-The `.env.template` file explains the circumstances in which a developer may want to populate these variables.
+The `configuration/configuration.env.template` file explains the circumstances in which a developer may want to populate these variables.
 
-In order for this devenv setup to work properly, you must create a `.env` file from the template _and_ configure the `SVN_*` variables.
+In order for this devenv setup to work properly, you must create a `configuration/configuration.env` file from the template _and_ configure at least the `SVN_*` variables.
 
 5. Run `vagrant up`
 

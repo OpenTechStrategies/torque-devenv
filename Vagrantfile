@@ -44,6 +44,7 @@ Vagrant.configure(2) do |config|
   config.vm.synced_folder "../torque-sites", "/home/vagrant/torque-sites", owner: "vagrant", group: "vagrant"
   config.vm.synced_folder "../data", "/home/vagrant/data", owner: "vagrant", group: "vagrant"
   config.vm.synced_folder "../SimpleBook", "/home/vagrant/SimpleBook", owner: "vagrant", group: "vagrant"
+  config.vm.synced_folder "./configuration", "/home/vagrant/configuration", owner: "vagrant", group: "vagrant"
 
   # Provider-specific configuration so you can fine-tune various
   # backing providers for Vagrant. These expose provider-specific options.
@@ -62,11 +63,7 @@ Vagrant.configure(2) do |config|
   config.vm.provision "file", source: "templates", destination: "/tmp/templates"
   config.vm.provision "shell", path: "configure.sh",
     env: {"APP_USER": "vagrant",
-          "TEMPLATES_PATH": "/tmp/templates",
-          "OTS_SVN_USERNAME": ENV["OTS_SVN_USERNAME"],
-          "OTS_SVN_PASSWORD": ENV["OTS_SVN_PASSWORD"],
-          "DECRYPTION_PASSPHRASE": ENV["DECRYPTION_PASSPHRASE"],
-          "SIMPLESAML_OKTA_METADATA_URL": ENV["SIMPLESAML_OKTA_METADATA_URL"]}
+          "TEMPLATES_PATH": "/tmp/templates"}
 
   # IMPORTANT: escape characters MUST BE DOUBLE ESCAPED when writing an inline script.
   # If this script is ever moved to a file, the double escapes must be removed.
