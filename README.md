@@ -11,6 +11,10 @@ Follow these steps to get a development environment.
 
 2. Install [VirtualBox Guest Additions](https://www.virtualbox.org/manual/ch04.html) to support mounting shared folders.
 
+```
+vagrant plugin install vagrant-vbguest
+```
+
 3. Create *sibling* directories to `devenv`:
 
 * `torque-sites`: a clone of the [torque-sites repository](https://github.com/OpenTechStrategies/torque-sites).
@@ -26,15 +30,16 @@ Your directory structure should look something like this:
 | - SimpleBook
 ```
 
-4. (Optional) Populate necessary environment variables
+4. (Optional, but highly recommended) Populate necessary environment variables
 
 ```
-$ cp .env.template .env
-$ vi .env
-$ source .env
+$ cp configuration/configuration.env.template configuration/configuration.env
+$ $EDITOR configuration/configuration.env
 ```
 
-The `.env.template` file explains the circumstances in which a developer may want to populate these variables.
+The `configuration/configuration.env.template` file explains the circumstances in which a developer may want to populate these variables.
+
+In order for this devenv setup to work properly, you must create a `configuration/configuration.env` file from the template _and_ configure at least the `SVN_*` variables.
 
 5. Run `vagrant up`
 
@@ -47,6 +52,10 @@ The following competitions are enabled after provisioning:
 
 ## Viewing Logs
 
+Apache logs are available _in the VM_ at `/var/log/apache2/`.
+
+MediaWiki logs can be enabled selectively by following the instructions [here](https://www.mediawiki.org/wiki/Manual:How_to_debug).
+
 ### SimpleBook
 
 SimpleBook is run as a systemd service and logs can be found at:
@@ -58,9 +67,21 @@ SimpleBook is run as a systemd service and logs can be found at:
 /var/log/simplebook.error.log
 ```
 
+## Using the Development Environment
+
+### 100Change2020
+1. Log in with a local user by opening `http://{GUEST_IP}/100Change2020/locallogin.php`. You can use `admin` and `admin_password` as the username and password, respectively.
+2. Browse through some of the applications by clicking on the `Random Page` link on the wiki sidebar.
+ 
 ## Tips
 
 * To stop the virtual machine run `vagrant halt`
 * To SSH into the virtual machine run `vagrant ssh`
-* If you want to re-run the contents of the VagrantFile you can run `vagrant up --provision` to reprovision.
+* If you want to re-run the contents of the VagrantFile you can run
+
+  ```
+  vagrant up --provision
+  ```
+
+  to reprovision.
 * If you really want to completely start fresh run `vagrant destroy`.
