@@ -65,6 +65,9 @@ echo "Install web server tools"
 apt-get -qq install -y apache2
 chown -R www-data /var/www/
 
+echo "Install SimpleBook packages"
+apt-get -qq install -y pipenv
+curl -sL https://deb.nodesource.com/setup_14.x | sudo -E bash - && sudo apt-get install -y nodejs
 
 echo "Set up Redis"
 cd /home/vagrant
@@ -122,6 +125,30 @@ export HTML_DIRECTORY=$ROOT_WEB_DIRECTORY
 # Set up folder access
 mkdir /var/www/html/competitions
 chown vagrant:www-data /var/www/html/competitions
+
+# Install SimpleBook
+echo "INSTALL SIMPLEBOOK SERVER"
+cd /home/vagrant/torque-sites/base/simplebook/ansible
+envsubst < inv/local/group_vars/all.tmpl > inv/local/group_vars/all
+ansible-playbook simplebook.yml -i inv/local
+
+# Overwrite SimpleBook server installation with mounted folder
+# This replaces the server components of simplebook with our local / developer
+# copy, and makes sure the developer copy has it's relevant packages installed.
+#
+# This means that if you "print" a book in a competition from devenv it will hit
+# your local code copy instead of the ansible-installed code base (which will just
+# be) whatever version is tagged in torque-sites as the one to use from github.
+if [[ -L $SIMPLEBOOK_INSTALL_DIRECTORY ]]; then
+  echo "WARNING: The SIMPLEBOOK_INSTALL_DIRECTORY is already a symlink, skipping mount linking step."
+else
+	rm -fr $SIMPLEBOOK_INSTALL_DIRECTORY
+	ln -s /home/vagrant/SimpleBook $SIMPLEBOOK_INSTALL_DIRECTORY
+	cd $SIMPLEBOOK_INSTALL_DIRECTORY/services/api
+	pipenv install
+	cd $SIMPLEBOOK_INSTALL_DIRECTORY/services/api/mw2pdf
+	yarn install
+fi
 
 # Install mwlib
 echo "INSTALL MWLIB"
@@ -209,6 +236,8 @@ then
 	cd /home/vagrant/torque-sites/competitions/LLIIA2020/etl
 	envsubst < config.py.tmpl > config.py
 	./deploy -g "$DECRYPTION_PASSPHRASE" /home/vagrant/data/decrypted
+	rm -fr /var/www/html/LLIIA2020/extensions/SimpleBook
+	ln -s /home/vagrant/SimpleBook /var/www/html/LLIIA2020/extensions/SimpleBook
 fi
 
 # Install the Climate2030 competition
