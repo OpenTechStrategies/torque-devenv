@@ -57,11 +57,6 @@ echo "Install essential software pacakges"
 apt-get -qq update
 apt-get -qq install -y ansible
 
-echo "Install Node"
-curl -sL https://deb.nodesource.com/setup_14.x | sudo bash -
-sudo apt -y install nodejs
-sudo npm install --global yarn
-
 echo "Install ETL software packages"
 apt-get -qq install -y subversion git gpg unzip python3-pip acl
 apt-get -qq install -y xlsx2csv
@@ -70,19 +65,9 @@ echo "Install web server tools"
 apt-get -qq install -y apache2
 chown -R www-data /var/www/
 
-echo "Install SimpleBook depdendencies"
-apt-get -qq install -y ca-certificates fonts-liberation libappindicator3-1 libasound2
-apt-get -qq install -y libatk-bridge2.0-0 libatk1.0-0 libc6libcairo2 libcups2 libdbus-1-3
-apt-get -qq install -y libexpat1 libfontconfig1 libgbm1 libgcc1 libglib2.0-0 libgtk-3-0 libnspr4
-apt-get -qq install -y libnss3 libpango-1.0-0 libpangocairo-1.0-0 libstdc++6 libx11-6 libx11-xcb1
-apt-get -qq install -y libxcb1 libxcomposite1 libxcursor1 libxdamage1 libxext6 libxfixes3 libxi6
-apt-get -qq install -y libxrandr2 libxrender1 libxss1 libxtst6 lsb-release wget xdg-utils
+echo "Install SimpleBook packages"
 apt-get -qq install -y pipenv
-npm install -g yarn
-cd /home/vagrant/SimpleBook/services/api/mw2pdf
-yarn install
-cd /home/vagrant/SimpleBook/services/api
-pipenv install
+curl -sL https://deb.nodesource.com/setup_14.x | sudo -E bash - && sudo apt-get install -y nodejs
 
 echo "Set up Redis"
 cd /home/vagrant
@@ -120,7 +105,8 @@ export MEDIAWIKI_MWLIB_USERNAME=mwlib
 export MEDIAWIKI_MWLIB_PASSWORD=mwlib_password
 export MEDIAWIKI_CSV2WIKI_USERNAME=csv2wiki
 export MEDIAWIKI_CSV2WIKI_PASSWORD=csv2wiki_password
-export MWLIB_INSTALL_DIRECTORY=/home/vagrant/mwlib/
+export MWLIB_INSTALL_DIRECTORY=/home/vagrant/installed_services/mwlib/
+export SIMPLEBOOK_INSTALL_DIRECTORY=/home/vagrant/installed_services/simplebook # this MUST NOT END IN A SLASH
 export MYSQL_ROOT_PASSWORD=root
 export ROOT_WEB_DIRECTORY=/var/www/html
 export SIMPLESAML_INSTALL_DIRECTORY=/home/vagrant/simplesaml
@@ -139,6 +125,30 @@ export HTML_DIRECTORY=$ROOT_WEB_DIRECTORY
 # Set up folder access
 mkdir /var/www/html/competitions
 chown vagrant:www-data /var/www/html/competitions
+
+# Install SimpleBook
+echo "INSTALL SIMPLEBOOK SERVER"
+cd /home/vagrant/torque-sites/base/simplebook/ansible
+envsubst < inv/local/group_vars/all.tmpl > inv/local/group_vars/all
+ansible-playbook simplebook.yml -i inv/local
+
+# Overwrite SimpleBook server installation with mounted folder
+# This replaces the server components of simplebook with our local / developer
+# copy, and makes sure the developer copy has it's relevant packages installed.
+#
+# This means that if you "print" a book in a competition from devenv it will hit
+# your local code copy instead of the ansible-installed code base (which will just
+# be) whatever version is tagged in torque-sites as the one to use from github.
+if [[ -L $SIMPLEBOOK_INSTALL_DIRECTORY ]]; then
+  echo "WARNING: The SIMPLEBOOK_INSTALL_DIRECTORY is already a symlink, skipping mount linking step."
+else
+	rm -fr $SIMPLEBOOK_INSTALL_DIRECTORY
+	ln -s /home/vagrant/SimpleBook $SIMPLEBOOK_INSTALL_DIRECTORY
+	cd $SIMPLEBOOK_INSTALL_DIRECTORY/services/api
+	pipenv install
+	cd $SIMPLEBOOK_INSTALL_DIRECTORY/services/api/mw2pdf
+	yarn install
+fi
 
 # Install mwlib
 echo "INSTALL MWLIB"
@@ -189,11 +199,6 @@ else
 	ETL_ENABLED=true
 fi
 
-# Set up SimpleBook
-cp $TEMPLATES_PATH/etc/supervisor/conf.d/simplebook.conf /etc/supervisor/conf.d/simplebook.conf
-sudo supervisorctl update simplebook
-sudo supervisorctl update simplebook-api
-
 # Install the DemoView competition
 echo "INSTALL DemoView competition"
 export MEDIAWIKI_INSTALL_DIRECTORY=/var/www/html/competitions/DemoView
@@ -215,8 +220,6 @@ then
 	cd /home/vagrant/torque-sites/competitions/100Change2020/etl
 	envsubst < config.py.tmpl > config.py
 	./deploy -g "$DECRYPTION_PASSPHRASE" /home/vagrant/data/decrypted
-	rm -fr /var/www/html/100Change2020/extensions/Collection
-	ln -s /home/vagrant/SimpleBook /var/www/html/100Change2020/extensions/Collection
 fi
 
 # Install the LLIIA2020 competition
@@ -233,11 +236,11 @@ then
 	cd /home/vagrant/torque-sites/competitions/LLIIA2020/etl
 	envsubst < config.py.tmpl > config.py
 	./deploy -g "$DECRYPTION_PASSPHRASE" /home/vagrant/data/decrypted
-	rm -fr /var/www/html/LLIIA2020/extensions/Collection
-	ln -s /home/vagrant/SimpleBook /var/www/html/LLIIA2020/extensions/Collection
+	rm -fr /var/www/html/LLIIA2020/extensions/SimpleBook
+	ln -s /home/vagrant/SimpleBook /var/www/html/LLIIA2020/extensions/SimpleBook
 fi
 
-# Install the Climte2030 competition
+# Install the Climate2030 competition
 echo "INSTALL Climate2030 competition"
 export MEDIAWIKI_INSTALL_DIRECTORY=/var/www/html/competitions/Climate2030
 cd /home/vagrant/torque-sites/competitions/Climate2030/ansible
@@ -251,8 +254,6 @@ then
 	cd /home/vagrant/torque-sites/competitions/Climate2030/etl
 	envsubst < config.py.tmpl > config.py
 	./deploy -g "$DECRYPTION_PASSPHRASE" /home/vagrant/data/decrypted
-	rm -fr /var/www/html/Climate2030/extensions/Collection
-	ln -s /home/vagrant/SimpleBook /var/www/html/Climate2030/extensions/Collection
 fi
 
 # Install the LoneStar2020 competition
@@ -269,8 +270,6 @@ then
 	cd /home/vagrant/torque-sites/competitions/LoneStar2020/etl
 	envsubst < config.py.tmpl > config.py
 	./deploy -g "$DECRYPTION_PASSPHRASE" /home/vagrant/data/decrypted
-	rm -fr /var/www/html/LoneStar2020/extensions/Collection
-	ln -s /home/vagrant/SimpleBook /var/www/html/LoneStar2020/extensions/Collection
 fi
 
 echo "ALL DONE"
