@@ -69,22 +69,6 @@ echo "Install SimpleBook packages"
 apt-get -qq install -y pipenv
 curl -sL https://deb.nodesource.com/setup_14.x | sudo -E bash - && sudo apt-get install -y nodejs
 
-echo "Set up Redis"
-cd /home/vagrant
-wget http://download.redis.io/redis-stable.tar.gz
-tar xvzf redis-stable.tar.gz
-rm redis-stable.tar.gz
-cd redis-stable && make
-sudo cp src/redis-server /usr/local/bin/
-sudo cp src/redis-cli /usr/local/bin/
-sudo mkdir /etc/redis
-sudo mkdir -p /var/redis/6379
-sudo cp $TEMPLATES_PATH/etc/init.d/redis_6379 /etc/init.d/redis_6379
-sudo cp $TEMPLATES_PATH/etc/redis/6379.conf /etc/redis/6379.conf
-sudo chmod 722 /etc/init.d/redis_6379
-sudo update-rc.d redis_6379 defaults
-sudo /etc/init.d/redis_6379 start
-
 echo "Set up base ansible"
 export ANSIBLE_ROLES_PATH=$ANSIBLE_ROLES_PATH:/home/vagrant/torque-sites/roles
 
