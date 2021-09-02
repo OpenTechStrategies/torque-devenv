@@ -99,6 +99,7 @@ export SIMPLESAML_OKTA_METADATA_URL=$SIMPLESAML_OKTA_METADATA_URL
 export SIMPLESAML_SALT="$(LC_CTYPE=C tr -c -d '0123456789abcdefghijklmnopqrstuvwxyz' </dev/urandom | dd bs=32 count=1 2>/dev/null;echo)"
 export TORQUEDATA_INSTALL_DIRECTORY=/home/vagrant/torquedata
 export TORQUEDATA_SERVER_PORT=5000
+export SECRET_KEY="$(python -c \"import secrets; print(secrets.token_urlsafe())\")"
 
 # There are two names used for for the same thing in various ansible scripts
 # Rather than shave that yak at this stage, and rather than duplicate values,
@@ -129,9 +130,11 @@ else
 	rm -fr $SIMPLEBOOK_INSTALL_DIRECTORY
 	ln -s /home/vagrant/SimpleBook $SIMPLEBOOK_INSTALL_DIRECTORY
 	cd $SIMPLEBOOK_INSTALL_DIRECTORY/services/api
-	pipenv install
+	su - $APP_USER -c "pipenv install"
 	cd $SIMPLEBOOK_INSTALL_DIRECTORY/services/api/mw2pdf
 	yarn install
+	yarn build
+	supervisorctl restart all
 fi
 
 # Install mwlib
@@ -268,6 +271,22 @@ then
 	cd $OTS_DIR/clients/lever-for-change/torque-sites/ECW2020/data
 	$OTS_DIR/utils/get-bigdata -c
 	cd /home/vagrant/torque-sites/competitions/ECW2020/etl
+	envsubst < config.py.tmpl > config.py
+	./deploy -g "$DECRYPTION_PASSPHRASE" /home/vagrant/data/decrypted
+fi
+
+# Install the RacialEquity2030 competition
+echo "INSTALL RacialEquity2030 competition"
+export MEDIAWIKI_INSTALL_DIRECTORY=/var/www/html/competitions/RacialEquity2030
+cd /home/vagrant/torque-sites/competitions/RacialEquity2030/ansible
+envsubst < inv/local/group_vars/all.tmpl > inv/local/group_vars/all
+ansible-playbook RacialEquity2030.yml -i inv/local
+if [ ETL_ENABLED ]
+then
+	export WIKI_URL='http://127.0.0.1/RacialEquity2030'
+	cd $OTS_DIR/clients/lever-for-change/torque-sites/RacialEquity2030/data
+	$OTS_DIR/utils/get-bigdata -c
+	cd /home/vagrant/torque-sites/competitions/RacialEquity2030/etl
 	envsubst < config.py.tmpl > config.py
 	./deploy -g "$DECRYPTION_PASSPHRASE" /home/vagrant/data/decrypted
 fi
