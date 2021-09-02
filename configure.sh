@@ -130,9 +130,11 @@ else
 	rm -fr $SIMPLEBOOK_INSTALL_DIRECTORY
 	ln -s /home/vagrant/SimpleBook $SIMPLEBOOK_INSTALL_DIRECTORY
 	cd $SIMPLEBOOK_INSTALL_DIRECTORY/services/api
-	pipenv install
+	su - $APP_USER -c "pipenv install"
 	cd $SIMPLEBOOK_INSTALL_DIRECTORY/services/api/mw2pdf
 	yarn install
+	yarn build
+	supervisorctl restart all
 fi
 
 # Install mwlib
