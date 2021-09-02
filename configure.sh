@@ -273,4 +273,20 @@ then
 	./deploy -g "$DECRYPTION_PASSPHRASE" /home/vagrant/data/decrypted
 fi
 
+# Install the RacialEquity2030 competition
+echo "INSTALL RacialEquity2030 competition"
+export MEDIAWIKI_INSTALL_DIRECTORY=/var/www/html/competitions/RacialEquity2030
+cd /home/vagrant/torque-sites/competitions/RacialEquity2030/ansible
+envsubst < inv/local/group_vars/all.tmpl > inv/local/group_vars/all
+ansible-playbook RacialEquity2030.yml -i inv/local
+if [ ETL_ENABLED ]
+then
+	export WIKI_URL='http://127.0.0.1/RacialEquity2030'
+	cd $OTS_DIR/clients/lever-for-change/torque-sites/RacialEquity2030/data
+	$OTS_DIR/utils/get-bigdata -c
+	cd /home/vagrant/torque-sites/competitions/RacialEquity2030/etl
+	envsubst < config.py.tmpl > config.py
+	./deploy -g "$DECRYPTION_PASSPHRASE" /home/vagrant/data/decrypted
+fi
+
 echo "ALL DONE"
