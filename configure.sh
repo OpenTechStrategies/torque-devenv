@@ -99,6 +99,7 @@ export SIMPLESAML_OKTA_METADATA_URL=$SIMPLESAML_OKTA_METADATA_URL
 export SIMPLESAML_SALT="$(LC_CTYPE=C tr -c -d '0123456789abcdefghijklmnopqrstuvwxyz' </dev/urandom | dd bs=32 count=1 2>/dev/null;echo)"
 export TORQUEDATA_INSTALL_DIRECTORY=/home/vagrant/torquedata
 export TORQUEDATA_SERVER_PORT=5000
+export SECRET_KEY="$(python -c \"import secrets; print(secrets.token_urlsafe())\")"
 
 # There are two names used for for the same thing in various ansible scripts
 # Rather than shave that yak at this stage, and rather than duplicate values,
