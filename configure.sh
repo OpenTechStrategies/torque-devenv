@@ -3,7 +3,6 @@ echo "Running configuration script"
 export DEBIAN_FRONTEND=noninteractive
 
 echo "US/Central" | sudo tee /etc/timezone
-dpkg-reconfigure --frontend noninteractive tzdata
 
 # Let's read some configuration information
 # from the user.
@@ -56,7 +55,7 @@ cp $TEMPLATES_PATH/etc/apt/sources.list.d/* /etc/apt/sources.list.d/
 
 echo "Install essential software pacakges"
 apt-get -qq update
-apt-get -qq install -y ansible
+apt-get -qq install -y ansible python3
 
 echo "Install ETL software packages"
 apt-get -qq install -y subversion git gpg unzip python3-pip acl
@@ -91,16 +90,17 @@ export MEDIAWIKI_MWLIB_PASSWORD=mwlib_password
 export MEDIAWIKI_CSV2WIKI_USERNAME=csv2wiki
 export MEDIAWIKI_CSV2WIKI_PASSWORD=csv2wiki_password
 export MWLIB_INSTALL_DIRECTORY=/home/vagrant/installed_services/mwlib/
-export SIMPLEBOOK_INSTALL_DIRECTORY=/home/vagrant/installed_services/simplebook # this MUST NOT END IN A SLASH
+export SIMPLEBOOK_INSTALL_DIRECTORY=/home/vagrant/installed_services/SimpleBook # this MUST NOT END IN A SLASH
 export MYSQL_ROOT_PASSWORD=root
 export ROOT_WEB_DIRECTORY=/var/www/html
 export SIMPLESAML_INSTALL_DIRECTORY=/home/vagrant/simplesaml
 export SIMPLESAML_OKTA_METADATA_NAME=$SIMPLESAML_OKTA_METADATA_NAME
 export SIMPLESAML_OKTA_METADATA_URL=$SIMPLESAML_OKTA_METADATA_URL
+export GEOCODE_API_KEY=$GEOCODE_API_KEY
 export SIMPLESAML_SALT="$(LC_CTYPE=C tr -c -d '0123456789abcdefghijklmnopqrstuvwxyz' </dev/urandom | dd bs=32 count=1 2>/dev/null;echo)"
 export TORQUEDATA_INSTALL_DIRECTORY=/home/vagrant/torquedata
 export TORQUEDATA_SERVER_PORT=5000
-export SECRET_KEY="$(python -c \"import secrets; print(secrets.token_urlsafe())\")"
+export SECRET_KEY="$(python3 -c 'import secrets; print(secrets.token_urlsafe())')"
 
 # There are two names used for for the same thing in various ansible scripts
 # Rather than shave that yak at this stage, and rather than duplicate values,
@@ -111,6 +111,7 @@ export HTML_DIRECTORY=$ROOT_WEB_DIRECTORY
 # Set up folder access
 mkdir /var/www/html/competitions
 chown vagrant:www-data /var/www/html/competitions
+mkdir /home/vagrant/installed_services
 
 # Install SimpleBook
 echo "INSTALL SIMPLEBOOK SERVER"
@@ -137,12 +138,6 @@ else
 	yarn build
 	supervisorctl restart all
 fi
-
-# Install mwlib
-echo "INSTALL MWLIB"
-cd /home/vagrant/torque-sites/base/mwlib/ansible
-envsubst < inv/local/group_vars/all.tmpl > inv/local/group_vars/all
-ansible-playbook mwlib.yml -i inv/local
 
 # Install torquedata
 echo "INSTALL TORQUEDATA"
