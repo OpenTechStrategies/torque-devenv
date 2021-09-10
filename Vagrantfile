@@ -16,10 +16,10 @@ Vagrant.configure(2) do |config|
   # https://docs.vagrantup.com.
 
   # Every Vagrant development environment requires a box. You can search for
-  # boxes at https://atlas.hashicorp.com/search or even make your own using
+  # boxes at https://app.vagrantup.com/boxes/search or even make your own using
   # the steps outlined at https://www.vagrantup.com/vagrant-cloud/boxes/create.
-  config.vm.box = "generic/debian10"
-  config.vm.box_version = "3.1.10"
+  config.vm.box = "generic/debian11"
+  config.vm.box_version = "3.4.2"
   config.vm.define "lever-for-change"
 
   # Disable automatic box update checking. If you disable this, then

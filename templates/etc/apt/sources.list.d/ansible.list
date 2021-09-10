@@ -1,1 +1,1 @@
-deb http://ppa.launchpad.net/ansible/ansible/ubuntu trusty main
+deb [signed-by=/usr/local/share/keyrings/ansible.gpg] http://ppa.launchpad.net/ansible/ansible/ubuntu focal main
