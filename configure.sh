@@ -292,4 +292,23 @@ then
 	./deploy -g "$DECRYPTION_PASSPHRASE" /home/vagrant/data/decrypted
 fi
 
+# Install the Democracy22 competition
+echo "INSTALL Democracy22 competition"
+export MEDIAWIKI_INSTALL_DIRECTORY=/var/www/html/competitions/Democracy22
+cd /home/vagrant/torque-sites/competitions/Democracy22/ansible
+envsubst < inv/local/group_vars/all.tmpl > inv/local/group_vars/all
+ansible-playbook Democracy22.yml -i inv/local
+if [ ETL_ENABLED ]
+then
+	export WIKI_URL='http://127.0.0.1/Democracy22'
+	cd $OTS_DIR/clients/lever-for-change/torque-sites/Democracy22/data
+	$OTS_DIR/utils/get-bigdata -c
+	cd /home/vagrant/torque-sites/competitions/Democracy22/etl
+	envsubst < config.py.tmpl > config.py
+	./deploy -g "$DECRYPTION_PASSPHRASE" /home/vagrant/data/decrypted
+fi
+
+
+echo ""
+
 echo "ALL DONE"
