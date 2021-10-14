@@ -12,8 +12,8 @@
 
 ### Section for authentication and authorization customizations.
 [auth]
-### We need to explicitly disable password stores in order to have passwords save properly
-### on the guest machine.
+### We need to explicitly set the password stores to empty in order to have
+### passwords save properly on the guest machine.
 password-stores =
 
 ### We don't use any of these sections.

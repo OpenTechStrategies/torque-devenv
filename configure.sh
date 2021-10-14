@@ -77,7 +77,12 @@ cp $TEMPLATES_PATH/etc/apache2/apache2.conf /etc/apache2/apache2.conf
 
 # Configure subversion
 mkdir /root/.subversion
+export OTS_SVN_PASSWORD_LENGTH=${#OTS_SVN_PASSWORD}
+export OTS_SVN_USERNAME_LENGTH=${#OTS_SVN_USERNAME}
 cp -R $TEMPLATES_PATH/root/.subversion/* /root/.subversion
+# SVN recently disabled non-interactive credential caching so we need to manually populate the cache
+envsubst < /root/.subversion/auth/svn.simple/f3f481873e9051b96cd12601a28ac010.tmpl > /root/.subversion/auth/svn.simple/f3f481873e9051b96cd12601a28ac010
+rm /root/.subversion/auth/svn.simple/f3f481873e9051b96cd12601a28ac010.tmpl
 
 # Define env variables for ansible templates
 export DB_USERNAME=torque
