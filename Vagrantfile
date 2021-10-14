@@ -44,6 +44,7 @@ Vagrant.configure(2) do |config|
   config.vm.synced_folder "../torque-sites", "/home/vagrant/torque-sites", owner: "vagrant", group: "vagrant"
   config.vm.synced_folder "../data", "/home/vagrant/data", owner: "vagrant", group: "vagrant"
   config.vm.synced_folder "../SimpleBook", "/home/vagrant/SimpleBook", owner: "vagrant", group: "vagrant"
+  config.vm.synced_folder "../SimpleMaps", "/home/vagrant/SimpleMaps", owner: "vagrant", group: "vagrant"
   config.vm.synced_folder "./configuration", "/home/vagrant/configuration", owner: "vagrant", group: "vagrant"
 
   # Provider-specific configuration so you can fine-tune various
