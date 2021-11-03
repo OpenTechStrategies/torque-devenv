@@ -41,7 +41,8 @@ Vagrant.configure(2) do |config|
   # the path on the host to the actual folder. The second argument is
   # the path on the guest to mount the folder. And the optional third
   # argument is a set of non-required options.
-  config.vm.synced_folder "../torque-sites", "/home/vagrant/torque-sites", owner: "vagrant", group: "vagrant"
+  config.vm.synced_folder "../torque", "/home/vagrant/torque", owner: "vagrant", group: "vagrant"
+	config.vm.synced_folder "../torque-sites", "/home/vagrant/torque-sites", owner: "vagrant", group: "vagrant"
   config.vm.synced_folder "../data", "/home/vagrant/data", owner: "vagrant", group: "vagrant"
   config.vm.synced_folder "../SimpleBook", "/home/vagrant/SimpleBook", owner: "vagrant", group: "vagrant"
   config.vm.synced_folder "../SimpleMaps", "/home/vagrant/SimpleMaps", owner: "vagrant", group: "vagrant"
