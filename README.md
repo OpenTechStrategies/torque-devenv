@@ -17,6 +17,7 @@ vagrant plugin install vagrant-vbguest
 
 3. Create *sibling* directories to `devenv`:
 
+* `torque`: a clone of the [torque repository](https://github.com/OpenTechStrategies/torque).
 * `torque-sites`: a clone of the [torque-sites repository](https://github.com/OpenTechStrategies/torque-sites).
 * `data`: an empty folder where competition data will be stored.
 * `SimpleBook`: a clone of the [SimpleBook repository](https://github.com/OpenTechStrategies/SimpleBook).
@@ -27,6 +28,7 @@ Your directory structure should look something like this:
 - lever-for-change
 | - devenv
 | - torque-sites
+| - torque
 | - data
 | - SimpleBook
 | - SimpleMaps

@@ -103,7 +103,7 @@ export SIMPLESAML_OKTA_METADATA_NAME=$SIMPLESAML_OKTA_METADATA_NAME
 export SIMPLESAML_OKTA_METADATA_URL=$SIMPLESAML_OKTA_METADATA_URL
 export GEOCODE_API_KEY=$GEOCODE_API_KEY
 export SIMPLESAML_SALT="$(LC_CTYPE=C tr -c -d '0123456789abcdefghijklmnopqrstuvwxyz' </dev/urandom | dd bs=32 count=1 2>/dev/null;echo)"
-export TORQUEDATA_INSTALL_DIRECTORY=/home/vagrant/torquedata
+export TORQUEDATA_INSTALL_DIRECTORY=/home/vagrant/installed_services/torquedata/ # this MUST end in a slash
 export TORQUEDATA_SERVER_PORT=5000
 export SECRET_KEY="$(python3 -c 'import secrets; print(secrets.token_urlsafe())')"
 
@@ -149,6 +149,13 @@ echo "INSTALL TORQUEDATA"
 cd /home/vagrant/torque-sites/base/torquedata/ansible
 envsubst < inv/local/group_vars/all.tmpl > inv/local/group_vars/all
 ansible-playbook torquedata.yml -i inv/local
+mv $TORQUEDATA_INSTALL_DIRECTORY/server/config.py ~/tmptorqueconfig.py
+rm -fr $TORQUEDATA_INSTALL_DIRECTORY
+ln -s ~/torque $TORQUEDATA_INSTALL_DIRECTORY
+ln -s $TORQUEDATA_INSTALL_DIRECTORY/torque/torquedata/ $TORQUEDATA_INSTALL_DIRECTORY/server
+cd $TORQUEDATA_INSTALL_DIRECTORY/server
+pipenv install
+mv ~/tmptorqueconfig.py $TORQUEDATA_INSTALL_DIRECTORY/server/config.py
 
 # Install simplesaml
 echo "INSTALL SIMPLESAML"
