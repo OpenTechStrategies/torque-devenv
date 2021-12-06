@@ -106,6 +106,7 @@ export SIMPLESAML_SALT="$(LC_CTYPE=C tr -c -d '0123456789abcdefghijklmnopqrstuvw
 export TORQUEDATA_INSTALL_DIRECTORY=/home/vagrant/installed_services/torquedata/ # this MUST end in a slash
 export TORQUEDATA_SERVER_PORT=5000
 export SECRET_KEY="$(python3 -c 'import secrets; print(secrets.token_urlsafe())')"
+export OTS_DIR=/home/vagrant/data/ots
 
 # There are two names used for for the same thing in various ansible scripts
 # Rather than shave that yak at this stage, and rather than duplicate values,
@@ -170,7 +171,6 @@ then
 	ETL_ENABLED=false
 else
 	echo "Set up ETL"
-	export OTS_DIR=/home/vagrant/data/ots
 	mkdir -p $OTS_DIR/clients/lever-for-change/torque-sites
 	mkdir -p $OTS_DIR/utils
 
@@ -315,7 +315,10 @@ then
 	./deploy -g "$DECRYPTION_PASSPHRASE" /home/vagrant/data/decrypted
 fi
 
-
-echo ""
+# Set up environment variables
+echo "SAVE environment variables to /home/vagrant/.profile"
+echo "export OTS_DIR=$OTS_DIR" >> /home/vagrant/.profile
+echo "export DECRYPTION_PASSPHRASE=$DECRYPTION_PASSPHRASE" >> /home/vagrant/.profile
+echo "export ANSIBLE_ROLES_PATH=$ANSIBLE_ROLES_PATH:/home/vagrant/torque-sites/roles" >> /home/vagrant/.profile
 
 echo "ALL DONE"
