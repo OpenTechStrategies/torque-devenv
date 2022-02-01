@@ -60,6 +60,7 @@ apt-get -qq install -y ansible python3
 echo "Install ETL software packages"
 apt-get -qq install -y subversion git gpg unzip python3-pip acl
 apt-get -qq install -y xlsx2csv
+apt-get -qq install -y csvkit
 
 echo "Install web server tools"
 apt-get -qq install -y apache2
@@ -83,6 +84,7 @@ cp -R $TEMPLATES_PATH/root/.subversion/* /root/.subversion
 # SVN recently disabled non-interactive credential caching so we need to manually populate the cache
 envsubst < /root/.subversion/auth/svn.simple/f3f481873e9051b96cd12601a28ac010.tmpl > /root/.subversion/auth/svn.simple/f3f481873e9051b96cd12601a28ac010
 rm /root/.subversion/auth/svn.simple/f3f481873e9051b96cd12601a28ac010.tmpl
+cp -R /root/.subversion /home/vagrant
 
 # Define env variables for ansible templates
 export DB_USERNAME=torque
@@ -94,6 +96,8 @@ export MEDIAWIKI_MWLIB_USERNAME=mwlib
 export MEDIAWIKI_MWLIB_PASSWORD=mwlib_password
 export MEDIAWIKI_CSV2WIKI_USERNAME=csv2wiki
 export MEDIAWIKI_CSV2WIKI_PASSWORD=csv2wiki_password
+export MEDIAWIKI_TORQUEADMIN_USERNAME=torqueadmin
+export MEDIAWIKI_TORQUEADMIN_PASSWORD=torqueadmin_password
 export MWLIB_INSTALL_DIRECTORY=/home/vagrant/installed_services/mwlib/
 export SIMPLEBOOK_INSTALL_DIRECTORY=/home/vagrant/installed_services/SimpleBook # this MUST NOT END IN A SLASH
 export MYSQL_ROOT_PASSWORD=root
@@ -103,7 +107,7 @@ export SIMPLESAML_OKTA_METADATA_NAME=$SIMPLESAML_OKTA_METADATA_NAME
 export SIMPLESAML_OKTA_METADATA_URL=$SIMPLESAML_OKTA_METADATA_URL
 export GEOCODE_API_KEY=$GEOCODE_API_KEY
 export SIMPLESAML_SALT="$(LC_CTYPE=C tr -c -d '0123456789abcdefghijklmnopqrstuvwxyz' </dev/urandom | dd bs=32 count=1 2>/dev/null;echo)"
-export TORQUEDATA_INSTALL_DIRECTORY=/home/vagrant/installed_services/torquedata/ # this MUST end in a slash
+export TORQUEDATA_INSTALL_DIRECTORY=/home/vagrant/installed_services/torquedata
 export TORQUEDATA_SERVER_PORT=5000
 export SECRET_KEY="$(python3 -c 'import secrets; print(secrets.token_urlsafe())')"
 export OTS_DIR=/home/vagrant/data/ots
@@ -152,7 +156,7 @@ envsubst < inv/local/group_vars/all.tmpl > inv/local/group_vars/all
 ansible-playbook torquedata.yml -i inv/local
 mv $TORQUEDATA_INSTALL_DIRECTORY/server/config.py ~/tmptorqueconfig.py
 rm -fr $TORQUEDATA_INSTALL_DIRECTORY
-ln -s ~/torque $TORQUEDATA_INSTALL_DIRECTORY
+ln -s home/vagrant/torque $TORQUEDATA_INSTALL_DIRECTORY
 ln -s $TORQUEDATA_INSTALL_DIRECTORY/torque/torquedata/ $TORQUEDATA_INSTALL_DIRECTORY/server
 cd $TORQUEDATA_INSTALL_DIRECTORY/server
 pipenv install
@@ -315,10 +319,72 @@ then
 	./deploy -g "$DECRYPTION_PASSPHRASE" /home/vagrant/data/decrypted
 fi
 
+# Install the EO2020 competition
+echo "INSTALL EO2020 competition"
+export MEDIAWIKI_INSTALL_DIRECTORY=/var/www/html/competitions/EO2020
+cd /home/vagrant/torque-sites/competitions/EO2020/ansible
+envsubst < inv/local/group_vars/all.tmpl > inv/local/group_vars/all
+ansible-playbook EO2020.yml -i inv/local
+if [ ETL_ENABLED ]
+then
+	export WIKI_URL='http://127.0.0.1/EO2020'
+	cd $OTS_DIR/clients/lever-for-change/torque-sites/EO2020/data
+	$OTS_DIR/utils/get-bigdata -c
+	cd /home/vagrant/torque-sites/competitions/EO2020/etl
+	envsubst < config.py.tmpl > config.py
+	./deploy -g "$DECRYPTION_PASSPHRASE" /home/vagrant/data/decrypted
+fi
+
+# Install the 100Change2017 competition
+echo "INSTALL 100Change2017 competition"
+export MEDIAWIKI_INSTALL_DIRECTORY=/var/www/html/competitions/100Change2017
+cd /home/vagrant/torque-sites/competitions/100Change2017/ansible
+envsubst < inv/local/group_vars/all.tmpl > inv/local/group_vars/all
+ansible-playbook 100Change2017.yml -i inv/local
+if [ ETL_ENABLED ]
+then
+	export WIKI_URL='http://127.0.0.1/100Change2017'
+	cd $OTS_DIR/clients/lever-for-change/torque-sites/100Change2017/data
+	$OTS_DIR/utils/get-bigdata -c
+	cd /home/vagrant/torque-sites/competitions/100Change2017/etl
+	envsubst < config.py.tmpl > config.py
+	./deploy -g "$DECRYPTION_PASSPHRASE" /home/vagrant/data/decrypted
+fi
+
+# Install the ChicagoPrize competition
+echo "INSTALL ChicagoPrize competition"
+export MEDIAWIKI_INSTALL_DIRECTORY=/var/www/html/competitions/ChicagoPrize
+cd /home/vagrant/torque-sites/competitions/ChicagoPrize/ansible
+envsubst < inv/local/group_vars/all.tmpl > inv/local/group_vars/all
+ansible-playbook ChicagoPrize.yml -i inv/local
+if [ ETL_ENABLED ]
+then
+	export WIKI_URL='http://127.0.0.1/ChicagoPrize'
+	cd $OTS_DIR/clients/lever-for-change/torque-sites/ChicagoPrize/data
+	$OTS_DIR/utils/get-bigdata -c
+	cd /home/vagrant/torque-sites/competitions/ChicagoPrize/etl
+	envsubst < config.py.tmpl > config.py
+	./deploy -g "$DECRYPTION_PASSPHRASE" /home/vagrant/data/decrypted
+fi
+
+# Install the GlobalView competition
+echo "INSTALL GlobalView competition"
+export MEDIAWIKI_INSTALL_DIRECTORY=/var/www/html/competitions/GlobalView
+cd /home/vagrant/torque-sites/competitions/GlobalView/ansible
+envsubst < inv/local/group_vars/all.tmpl > inv/local/group_vars/all
+ansible-playbook GlobalView.yml -i inv/local
+if [ ETL_ENABLED ]
+then
+	export WIKI_URL='http://127.0.0.1/GlobalView'
+	cd /home/vagrant/torque-sites/competitions/GlobalView/etl
+	envsubst < config.py.tmpl > config.py
+	./deploy /home/vagrant/data/decrypted
+fi
+
 # Set up environment variables
 echo "SAVE environment variables to /home/vagrant/.profile"
-echo "export OTS_DIR=$OTS_DIR" >> /home/vagrant/.profile
-echo "export DECRYPTION_PASSPHRASE=$DECRYPTION_PASSPHRASE" >> /home/vagrant/.profile
+echo "export OTS_DIR=\"$OTS_DIR\"" >> /home/vagrant/.profile
+echo "export DECRYPTION_PASSPHRASE=\"$DECRYPTION_PASSPHRASE\"" >> /home/vagrant/.profile
 echo "export ANSIBLE_ROLES_PATH=$ANSIBLE_ROLES_PATH:/home/vagrant/torque-sites/roles" >> /home/vagrant/.profile
 
 echo "ALL DONE"
