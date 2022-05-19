@@ -381,9 +381,24 @@ then
 	./deploy /home/vagrant/data/decrypted
 fi
 
+# Install the Backstage wiki
+echo "INSTALL Backstage wiki"
+export MEDIAWIKI_INSTALL_DIRECTORY=/var/www/html/competitions/Backstage
+cd /home/vagrant/torque-sites/competitions/Backstage/ansible
+envsubst < inv/local/group_vars/all.tmpl > inv/local/group_vars/all
+ansible-playbook Backstage.yml -i inv/local
+if [ ETL_ENABLED ]
+then
+	export WIKI_URL='http://127.0.0.1/Backstage'
+	cd /home/vagrant/torque-sites/competitions/Backstage/etl
+	envsubst < config.py.tmpl > config.py
+	./deploy /home/vagrant/data/decrypted
+fi
+
 # Set up environment variables
 echo "SAVE environment variables to /home/vagrant/.profile"
 echo "export OTS_DIR=\"$OTS_DIR\"" >> /home/vagrant/.profile
+echo "export OTS_USERNAME=\"$OTS_USERNAME\"" >> /home/vagrant/.profile
 echo "export DECRYPTION_PASSPHRASE=\"$DECRYPTION_PASSPHRASE\"" >> /home/vagrant/.profile
 echo "export ANSIBLE_ROLES_PATH=$ANSIBLE_ROLES_PATH:/home/vagrant/torque-sites/roles" >> /home/vagrant/.profile
 
